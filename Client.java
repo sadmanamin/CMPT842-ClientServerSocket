@@ -1,55 +1,58 @@
-import java.net.*;
-import java.io.*;
-import java.util.*;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
+import java.net.Socket;
+import java.util.Scanner;
 
-public class Client{
-    private Socket clientSocket;
-    private PrintWriter output;
-    private BufferedReader input;
-
+public class Client2 {
     public static void main(String[] args){
-        Scanner sc = new Scanner(System.in);
-        Client client = new Client();
-        String msg;
-        try{
-            client.startConnection("localhost",5001);        
-            while(true){
-                msg = sc.nextLine();
-                System.out.println(client.sendMessage(msg));
-            }
-        }
-        catch(Exception e){
-            System.out.println(e);
-        }        
-    }
+        final Socket clientSocket; // socket used by client to send and recieve data from server
+        final BufferedReader in;   // object to read data from socket
+        final PrintWriter out;     // object to write data into socket
+        final Scanner sc = new Scanner(System.in); // object to read data from user's keybord
+        try {
+            clientSocket = new Socket("127.0.0.1",5001);
+            out = new PrintWriter(clientSocket.getOutputStream());
+            in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
 
-    public void startConnection(String ip, int port) throws Exception{
-        clientSocket = new Socket(ip, port);
-        output = new PrintWriter(clientSocket.getOutputStream(), true);
-        input = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-        System.out.println(sendMessage("Hello from client 1"));
-    }
+            String name = sc.nextLine();
+            out.println(name);
+            out.flush();
 
-    public String sendMessage(String msg) {
-        try{
-            output.println(msg+"\n");
-            String resp = input.readLine();
-            return resp;
-        }
-        catch(Exception e){
-            System.out.println(e);
-            return null;
-        }
-    }
-
-    public void stopConnection() {
-        try{
-            input.close();
-            output.close();
-            clientSocket.close();
-        }
-        catch(Exception e){
-            System.out.println(e);
+            Thread sender = new Thread(new Runnable() {
+                String msg;
+                @Override
+                public void run() {
+                    while(true){
+                        msg = sc.nextLine();
+                        out.println(msg);
+                        out.flush();
+                    }
+                }
+            });
+            sender.start();
+            Thread receiver = new Thread(new Runnable() {
+                String msg;
+                @Override
+                public void run() {
+                    try {
+                        msg = in.readLine();
+                        while(msg!=null){
+                            System.out.println("Server : "+msg);
+                            msg = in.readLine();
+                        }
+                        System.out.println("Server out of service");
+                        out.close();
+                        clientSocket.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            });
+            receiver .start();
+    }catch (IOException e){
+        e.printStackTrace();
         }
     }
 }

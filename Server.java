@@ -59,14 +59,14 @@ public class Server{
         Socket client;
     
         public ManageUser(Socket client) throws Exception {
-            out.println("inside mamaeuser");
+            // out.println("inside mamaeuser");
             this.client = client;
             input = new BufferedReader(new InputStreamReader(client.getInputStream()));
             output = new PrintWriter(client.getOutputStream(),true);
-            out.println("inside mamaeuser");
+            // out.println("inside mamaeuser");
             userName = input.readLine();
             out.println(userName);
-            output.println("Hello from server");
+            // output.println("Hello from server");
             
             // String chatRoomNames = getChatRoomNames();
             // output.println("Available chatrooms, please respond with your selected ChatRoom name: \n"+chatRoomNames);
@@ -77,7 +77,7 @@ public class Server{
         }
 
         public void sendMessage(String chatUser, String message) throws IOException {
-            out.println("Inside sendmsg");
+            // out.println("Inside sendmsg");
             output.println(chatUser + " Says:" + message);
         }
 
@@ -90,22 +90,38 @@ public class Server{
             chatRoom.add(this);
         }
 
+        public void disconnect(){
+            try{
+                clients.remove(this);
+                users.remove(userName);
+                client.close(); 
+                sendtToAll(userName, userName+  " is disconnected.");  
+            }  
+            catch (Exception ex) {
+                System.out.println("exp in disconnect : " + ex.getMessage());
+            }       
+        }
+
         @Override
         public void run() {
-            out.println("Inside run");
-            String line;
+            // out.println("Inside run");
+            // String line;
+            String msg;
             try {
-                while (true) {
-                    line = input.readLine();
-                    out.println(line);
-                    if (line.equals("end")) {
-                        clients.remove(this);
-                        users.remove(userName);
-                        client.close();
-                        break;
+
+                msg = input.readLine();
+
+                while(msg!=null){
+                    out.println(msg);
+                    if (msg.equals("end")) {
+                        // disconnect();
+                        break;                        
                     }
-                    sendtToAll(userName, line); 
+                    sendtToAll(userName, msg); 
+                    msg = input.readLine();
                 }
+                disconnect();
+                System.out.println("Client déconecté");
             } 
             catch (Exception ex) {
                 System.out.println("exp in create server : " + ex.getMessage());
