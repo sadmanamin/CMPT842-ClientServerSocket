@@ -1,0 +1,9 @@
+version: "3.9"
+services:
+  server:
+    build: ./Server
+    network_mode: "host"
+  
+  client:
+    build: ./Client
+    network_mode: "host"

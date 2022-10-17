@@ -3,7 +3,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
-import java.net.UnknownHostException;
 import java.util.Scanner;
 
 public class Client {
@@ -18,25 +17,24 @@ public class Client {
             client.connect("localhost", 5001);           
         }
         catch (Exception e){
-        e.printStackTrace();
+            e.printStackTrace();
         }
     }
-
 
     public void connect(String host, int port) throws Exception{
         clientSocket = new Socket(host , port);
         out = new PrintWriter(clientSocket.getOutputStream());
         in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
 
-        System.out.println("Type your name:\n");
+        System.out.println("Type your name:");
         String name = sc.nextLine();
-        send_message(name);
+        sendMessage(name);
         
-        start_sender();
-        start_receiver();
+        startSender();
+        startReceiver();
     }
 
-    public void send_message(String msg) throws Exception{
+    public void sendMessage(String msg) throws Exception{
         if(msg.equals("EXIT")){
             System.exit(0);
         }
@@ -45,7 +43,7 @@ public class Client {
         out.flush();
     }
 
-    public void start_sender(){
+    public void startSender(){
         Thread sender = new Thread(new Runnable() {
             String msg;
             @Override
@@ -53,7 +51,7 @@ public class Client {
                 try{
                     while(true){
                         msg = sc.nextLine();
-                        send_message(msg);
+                        sendMessage(msg);
                     }
                 }
                 catch(Exception e){
@@ -64,7 +62,7 @@ public class Client {
         sender.start();
     }
 
-    public void start_receiver(){
+    public void startReceiver(){
         Thread receiver = new Thread(new Runnable() {
             String msg;
             @Override
@@ -72,7 +70,7 @@ public class Client {
                 try {
                     msg = in.readLine();
                     while(msg!=null){
-                        System.out.println("Server : "+msg);
+                        System.out.println(msg);
                         msg = in.readLine();
                     }
                     System.out.println("Server out of service");
