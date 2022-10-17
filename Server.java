@@ -4,6 +4,14 @@ import java.net.*;
 import static java.lang.System.out;
 
 public class Server{
+    final welcome_message = "Welcome to CMPT842 Chatserver. Use the following commands to operate with the server. \n
+    1. List all the chatrooms.\n
+    2. Join Chatroom.\n
+    3. Create Chatroom.\n
+    4. Leave Chatroom.\n\n
+    "
+
+
     public static void main(String[] args) throws Exception {
         new Server().createServer();
     }
