@@ -4,14 +4,7 @@ import java.net.*;
 import static java.lang.System.out;
 
 public class Server{
-    final welcome_message = "Welcome to CMPT842 Chatserver. Use the following commands to operate with the server. \n
-    1. List all the chatrooms.\n
-    2. Join Chatroom.\n
-    3. Create Chatroom.\n
-    4. Leave Chatroom.\n\n
-    "
-
-
+    final String welcome_message = "############\n\n Welcome to CMPT842 Chatserver. Use the following commands to operate with the server. \n\n1. List all the chatrooms.\n2. Join Chatroom.\n3. Create Chatroom.\n4. Leave Chatroom.\n\n Type CMD<SPACE>CMD_NO to run each command.\n\n To send a message, type SEND<SPACE>CHATROOM_NO<SPACE>YOUR MESSAGE.\n\n############\n";
     public static void main(String[] args) throws Exception {
         new Server().createServer();
     }
@@ -40,8 +33,18 @@ public class Server{
 
     public String getChatRoomNames(){
         String chatRooms = "";
-        for(String chatRoom : chatRoomList){
-            chatRooms = chatRoom + "\n";
+
+        if(chatRoomList.size() == 0){
+            chatRooms = "No chatroom available. Type CMD 3 to create a chatroom.";
+        }
+        else{
+            for(String chatRoom : chatRoomList){
+                chatRooms = chatRoom + "\n";
+            }
+
+            for(int i = 0; i<chatRoomList.size(); i++){
+                chatRooms = Integer.toString(i+1) + ": " +chatRooms + "\n";
+            }
         }
         return chatRooms;
     }
@@ -71,16 +74,14 @@ public class Server{
             this.client = client;
             input = new BufferedReader(new InputStreamReader(client.getInputStream()));
             output = new PrintWriter(client.getOutputStream(),true);
-            // out.println("inside mamaeuser");
+           
             userName = input.readLine();
             out.println(userName);
-            // output.println("Hello from server");
-            
-            // String chatRoomNames = getChatRoomNames();
-            // output.println("Available chatrooms, please respond with your selected ChatRoom name: \n"+chatRoomNames);
-            // String chatRoomName = input.readLine();
-            users.add(userName);
+            out.println(welcome_message);
+            output.println(welcome_message);
+            out.println("inside mamaeuser");
 
+            users.add(userName);
             start();
         }
 
@@ -104,16 +105,20 @@ public class Server{
                 users.remove(userName);
                 client.close(); 
                 sendtToAll(userName, userName+  " is disconnected.");  
+                System.out.println(userName+  " is disconnected.");
             }  
             catch (Exception ex) {
                 System.out.println("exp in disconnect : " + ex.getMessage());
             }       
         }
 
+        public void parse_message(String msg){
+
+        }
+
         @Override
         public void run() {
             // out.println("Inside run");
-            // String line;
             String msg;
             try {
 
@@ -121,15 +126,10 @@ public class Server{
 
                 while(msg!=null){
                     out.println(msg);
-                    if (msg.equals("end")) {
-                        // disconnect();
-                        break;                        
-                    }
-                    sendtToAll(userName, msg); 
+                    parse_message(msg);
                     msg = input.readLine();
                 }
                 disconnect();
-                System.out.println("Client déconecté");
             } 
             catch (Exception ex) {
                 System.out.println("exp in create server : " + ex.getMessage());
